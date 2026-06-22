@@ -1,0 +1,9 @@
+# Tier-1 competitor baseline: REAL LangChain, driven by the SAME fixed-latency mock and the
+# SAME busy() CPU loop as RocketRide (see harness/lc_baselines.py). No infra, no creds, no
+# network — the model is time.sleep and the CPU work is AST-identical to the RR node. Install:
+#   make provision-competitors        (or: pip install -r requirements-competitors.txt)
+# The resolved version is recorded in every results.json (verdict_metrics + provenance) so the
+# numbers are reproducible. The exact version below is the one that produced the committed numbers;
+# unpin to a >=0.3,<0.4 range if you want the latest 0.3.x instead.
+langchain-core==0.3.86
+langchain>=0.3,<0.4

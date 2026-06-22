@@ -1,0 +1,131 @@
+{
+  "benchmark": "concurrent-processing",
+  "hypothesis": "64 docs of stateful per-doc work: LangChain's idioms crash, serialize, or run sequential; RR's warm per-pipe topology is fast AND safe",
+  "provenance": {
+    "engine_dir": "/opt/rocketride-bench/engine",
+    "engine_version": "Version: 3.2.1.30 hash: 114509c6 stamp: 2026-05-29T19:19:06Z",
+    "uri": "ws://localhost:5565",
+    "cpu_brand": "Apple M5 Pro",
+    "machine": "macOS-26.5.1-arm64-arm-64bit",
+    "arch": "arm64",
+    "physical_cores": 18,
+    "logical_cores": 18,
+    "total_ram_gib": 24.0,
+    "python": "3.12.13",
+    "engine_sha256": "4ad67d110cac51a0c683e8724b47a8d22e3b7543d9684a78b750f521c566ebf7",
+    "engine_size_bytes": 79021832
+  },
+  "langchain_provenance": {
+    "lc_version": "0.3.86",
+    "lc_python": "/opt/rocketride-bench/.venv/bin/python",
+    "langchain_core_file": "/opt/rocketride-bench/.venv/lib/python3.12/site-packages/langchain_core/__init__.py",
+    "kind": "probe"
+  },
+  "params": {
+    "n_docs": 64,
+    "io_s": 0.1,
+    "Ms": [
+      8,
+      16
+    ],
+    "max_concurrency": 64,
+    "work": "sqlite INSERT+SELECT+commit + blocking sleep(io_s), AST-identical (parity-gated)"
+  },
+  "parity_gate": "PASS",
+  "rocketride": [
+    {
+      "M": 8,
+      "n_docs": 64,
+      "wall_s": 1.115,
+      "warm_s": 7.93,
+      "p50_ms": 130.01,
+      "p99_ms": 219.19,
+      "markers": 72,
+      "marker_pids": 8,
+      "node_errors": 0,
+      "sqlite_rows": 72,
+      "rows_expected": 72,
+      "status": "ok"
+    },
+    {
+      "M": 16,
+      "n_docs": 64,
+      "wall_s": 0.698,
+      "warm_s": 9.88,
+      "p50_ms": 163.68,
+      "p99_ms": 217.43,
+      "markers": 80,
+      "marker_pids": 16,
+      "node_errors": 0,
+      "sqlite_rows": 80,
+      "rows_expected": 80,
+      "status": "ok"
+    }
+  ],
+  "langchain": {
+    "batch_shared": {
+      "mode": "batch_shared",
+      "n": 64,
+      "io_s": 0.1,
+      "max_concurrency": 64,
+      "wall_s": 0.009412083018105477,
+      "n_ok": 0,
+      "n_err": 64,
+      "status": "crash",
+      "error_type": "sqlite3.ProgrammingError",
+      "error_example": "SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 8284774016 and this is thread id 6196817920.",
+      "lc_version": "0.3.86",
+      "kind": "probe",
+      "lc_python": "/opt/rocketride-bench/.venv/bin/python",
+      "langchain_core_file": "/opt/rocketride-bench/.venv/lib/python3.12/site-packages/langchain_core/__init__.py"
+    },
+    "abatch_blocking": {
+      "mode": "abatch_blocking",
+      "n": 64,
+      "io_s": 0.1,
+      "max_concurrency": 64,
+      "wall_s": 6.589265374990646,
+      "n_ok": 64,
+      "n_err": 0,
+      "status": "ok",
+      "error_type": null,
+      "error_example": null,
+      "lc_version": "0.3.86",
+      "kind": "probe",
+      "lc_python": "/opt/rocketride-bench/.venv/bin/python",
+      "langchain_core_file": "/opt/rocketride-bench/.venv/lib/python3.12/site-packages/langchain_core/__init__.py"
+    },
+    "seq": {
+      "mode": "seq",
+      "n": 64,
+      "io_s": 0.1,
+      "max_concurrency": 64,
+      "wall_s": 6.594873458030634,
+      "n_ok": 64,
+      "n_err": 0,
+      "status": "ok",
+      "error_type": null,
+      "error_example": null,
+      "lc_version": "0.3.86",
+      "kind": "probe",
+      "lc_python": "/opt/rocketride-bench/.venv/bin/python",
+      "langchain_core_file": "/opt/rocketride-bench/.venv/lib/python3.12/site-packages/langchain_core/__init__.py"
+    }
+  },
+  "rr_appendix_threads4": {
+    "topology": "1 pipe x threadCount=4, 32 files, naive module-level conn",
+    "markers": 32,
+    "distinct_tids": 4,
+    "node_errors": 31,
+    "error_example": "RRBENCH_ERR\tProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 6274134016 and this i"
+  },
+  "verdict_metrics": {
+    "rr_topM_wall_s": 0.698,
+    "rr_topM_ok": true,
+    "lc_batch_shared_status": "crash",
+    "lc_batch_shared_error": "sqlite3.ProgrammingError",
+    "lc_abatch_blocking_wall_s": 6.59,
+    "lc_seq_wall_s": 6.59,
+    "lc_version": "0.3.86"
+  }
+}

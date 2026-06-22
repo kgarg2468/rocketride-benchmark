@@ -1,0 +1,114 @@
+{
+  "components": [
+    {
+      "id": "dropper_1",
+      "provider": "dropper",
+      "config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "dropper" }
+    },
+    {
+      "id": "chat_1",
+      "provider": "chat",
+      "config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "chat" }
+    },
+    {
+      "id": "parse_1",
+      "provider": "parse",
+      "config": { "parameters": {} },
+      "input": [{ "lane": "tags", "from": "dropper_1" }]
+    },
+    {
+      "id": "question_1",
+      "provider": "question",
+      "config": { "instructions": [], "parameters": {} },
+      "input": [{ "lane": "text", "from": "parse_1" }]
+    },
+    {
+      "id": "agent_orchestrator",
+      "provider": "agent_deepagent",
+      "config": {
+        "max_waves": 10,
+        "parameters": {},
+        "instructions": [
+          "You are the orchestrator of a meeting-notes assistant. Your input on the questions lane is the full text of a single meeting transcript, arriving either from a dropped .docx/.vtt/.txt file or from pasted chat. Treat the entire input as the transcript.",
+          "Delegate; do not write the section content yourself. You have exactly two sub-agents: 'executive_summary_writer' (writes the executive summary) and 'action_item_extractor' (extracts the action items). Invoke BOTH on every run in a single parallel batch, passing each the COMPLETE transcript text so each has full context. The two sub-agents are independent and may run concurrently.",
+          "Assemble the final response by placing the executive_summary_writer's output verbatim under a level-2 heading '## Executive Summary', then a blank line, then the action_item_extractor's output verbatim under a level-2 heading '## Action Items'. Do not edit, summarize, or reorder a sub-agent's output.",
+          "Emit ONLY these two headed sections. No preamble, no closing remarks, no extra headings, no commentary about your process.",
+          "If a sub-agent returns nothing, retry it once; if still empty, put a single line 'Unavailable — sub-agent did not return output.' under that heading and still return the other section."
+        ]
+      },
+      "input": [
+        { "lane": "questions", "from": "question_1" },
+        { "lane": "questions", "from": "chat_1" }
+      ]
+    },
+    {
+      "id": "agent_summary",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "executive_summary_writer",
+        "description": "Writes a tight executive summary of a meeting from its transcript: what was decided and what happens next. Expects the full transcript in the task prompt; returns only summary prose.",
+        "parameters": {},
+        "instructions": [
+          "You are an executive summary writer. Your task prompt contains the full text of a meeting transcript. Produce a 3-4 sentence summary that is STRICTLY under 100 words.",
+          "Cover only (a) the decisions that were made and (b) what happens next. Exclude small talk, tangents, unresolved debate, and verbatim quotes. Use a neutral, factual, past-tense executive tone.",
+          "Return ONLY the summary prose. Do NOT add a heading, bullets, a label, or any preamble — the orchestrator supplies the '## Executive Summary' heading."
+        ]
+      },
+      "control": [{ "classType": "deepagent", "from": "agent_orchestrator" }]
+    },
+    {
+      "id": "agent_actions",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "action_item_extractor",
+        "description": "Extracts action items from a meeting transcript as 'Owner — task — deadline' lines. Expects the full transcript in the task prompt; returns only the action-item list.",
+        "parameters": {},
+        "instructions": [
+          "You extract action items from the meeting transcript provided in your task prompt.",
+          "Return one action item per line as 'Owner — task — deadline'. Use the owners and deadlines stated in the transcript; write 'TBD' where one is not stated. Never invent a name or a date.",
+          "Output ONLY the list — no heading, no preamble — the orchestrator supplies the '## Action Items' heading. If there are no action items, output the single line 'No action items identified.'"
+        ]
+      },
+      "control": [{ "classType": "deepagent", "from": "agent_orchestrator" }]
+    },
+    {
+      "id": "llm_orchestrator",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [{ "classType": "llm", "from": "agent_orchestrator" }]
+    },
+    {
+      "id": "llm_summary",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [{ "classType": "llm", "from": "agent_summary" }]
+    },
+    {
+      "id": "llm_actions",
+      "provider": "llm_gemini",
+      "config": {
+        "profile": "gemini-3-flash-preview",
+        "gemini-3-flash-preview": { "apikey": "${ROCKETRIDE_GOOGLE_KEY}" },
+        "parameters": {}
+      },
+      "control": [{ "classType": "llm", "from": "agent_actions" }]
+    },
+    {
+      "id": "response_1",
+      "provider": "response_answers",
+      "config": { "laneName": "answers" },
+      "input": [{ "lane": "answers", "from": "agent_orchestrator" }]
+    }
+  ],
+  "project_id": "9b3f6c2d-4a18-4e57-8d09-1c2b3a4d5e04",
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "version": 1
+}

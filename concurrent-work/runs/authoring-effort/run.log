@@ -1,0 +1,7 @@
+RR: rr/workflow.pipe — 0 imperative lines, 2 components, validate: PASS
+LC: lc/concurrent_batch.py     14 imperative lines, 3 decision points
+LC: lc/concurrent_abatch.py    17 imperative lines, 4 decision points
+LC: lc/concurrent_seq.py       14 imperative lines, 1 decision points
+LC: lc/concurrent_percall.py   17 imperative lines, 5 decision points
+
+VERDICT: the correct LC version needs 5 pieces of hidden knowledge; one crashes, one silently serializes, one is slow (see concurrent-processing). RR authors zero concurrency code (this claim is about imperative concurrency lines, not token count).

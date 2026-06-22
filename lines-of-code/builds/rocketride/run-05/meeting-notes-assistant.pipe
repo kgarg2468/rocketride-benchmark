@@ -1,0 +1,135 @@
+{
+  "components": [
+    {
+      "id": "chat_transcript_source",
+      "provider": "chat",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "chat"
+      }
+    },
+
+    {
+      "id": "agent_orchestrator",
+      "provider": "agent_deepagent",
+      "config": {
+        "advanced_mode": false,
+        "instructions": [
+          "You are the orchestrator of a meeting-notes assistant. Your input is a single raw meeting transcript pasted by the user.",
+          "Your job is to return ONE final response containing an executive summary and a draft follow-up email. You produce this by delegating to your two specialist sub-agents and assembling their outputs. Do NOT write either section yourself.",
+          "Delegate to BOTH sub-agents for this transcript, passing each the full verbatim transcript text: (1) 'executive_summary_writer' to produce the Executive Summary body, and (2) 'followup_email_writer' to produce the follow-up email body. Dispatch both delegations together so they run concurrently; do not wait for one before starting the other.",
+          "When both sub-agents have returned, assemble their outputs verbatim into the final response using EXACTLY this structure and nothing else — no preamble, no commentary, no surrounding code fences:",
+          "## Executive Summary",
+          "<the executive_summary_writer output>",
+          "",
+          "## Draft Follow-up Email",
+          "<the followup_email_writer output>",
+          "Before returning, validate the assembled response: it must contain exactly these two H2 headers in this order; the summary must be 3-4 sentences and under 100 words; the email body must be under 200 words and greet attendees by name. If a sub-agent's output violates its contract, delegate to that sub-agent again with specific corrective feedback, then re-assemble.",
+          "Never invent attendees, decisions, action items, owners, or dates that do not appear in the transcript. Output only the final two-section response."
+        ],
+        "max_waves": 10,
+        "parameters": {}
+      },
+      "input": [
+        { "lane": "questions", "from": "chat_transcript_source" }
+      ]
+    },
+
+    {
+      "id": "agent_summary_writer",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "executive_summary_writer",
+        "description": "Writes the Executive Summary section from a meeting transcript. Delegate here to produce a 3-4 sentence, under-100-word summary focused strictly on what was decided and what happens next.",
+        "advanced_mode": false,
+        "instructions": [
+          "You are an executive-summary specialist for meeting notes. You receive the full text of a single meeting transcript.",
+          "Write ONLY the executive summary body text. Do not add a header, label, greeting, bullet points, or any other section — the orchestrator adds the header.",
+          "Hard constraints: 3 to 4 sentences; strictly under 100 words; plain professional prose; no lists.",
+          "Focus exclusively on what was DECIDED and what HAPPENS NEXT. Omit small talk, tangents, and unresolved side chatter.",
+          "Be concrete: name the specific decisions and the immediate next steps. Do not fabricate anything that is not stated in the transcript.",
+          "Return only the summary paragraph."
+        ],
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "deepagent", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "agent_email_writer",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "followup_email_writer",
+        "description": "Drafts the follow-up email from a meeting transcript. Delegate here to produce a brief, professional email body that greets attendees by name, recaps decisions, lists action items with owners and deadlines, and proposes next steps.",
+        "advanced_mode": false,
+        "instructions": [
+          "You are a follow-up-email specialist for meeting notes. You receive the full text of a single meeting transcript.",
+          "Write ONLY the email body text. Do not add the '## Draft Follow-up Email' header (the orchestrator adds it) and do not wrap the output in code fences.",
+          "Structure the email: (1) a greeting addressing the attendees by name; (2) a one or two sentence recap of the key decisions; (3) a clearly labeled list of action items, each with its owner and deadline; (4) a short proposed next step; (5) a brief professional sign-off.",
+          "Hard constraints: under 200 words total; plain professional tone; no marketing language; no emojis.",
+          "Derive attendee names, owners, and deadlines ONLY from the transcript. If an owner or deadline was not stated, write 'TBD' rather than inventing one.",
+          "Return only the email body."
+        ],
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "deepagent", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "llm_orchestrator",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "llm_summary",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_summary_writer" }
+      ]
+    },
+
+    {
+      "id": "llm_email",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1-mini",
+        "gpt-4-1-mini": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_email_writer" }
+      ]
+    },
+
+    {
+      "id": "response_final",
+      "provider": "response_answers",
+      "config": { "laneName": "answers" },
+      "input": [
+        { "lane": "answers", "from": "agent_orchestrator" }
+      ]
+    }
+  ],
+  "project_id": "659b56e2-0ebb-41e4-bbac-cacd4fc1500c",
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "version": 1
+}

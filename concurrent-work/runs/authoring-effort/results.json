@@ -1,0 +1,84 @@
+{
+  "benchmark": "authoring-effort",
+  "hypothesis": "RR authoring carries zero imperative concurrency code and validates offline; LangChain authoring forces an unguided 3-way concurrency choice where one crashes, one silently serializes, one is slow (measured in concurrent-processing)",
+  "provenance": {
+    "engine_dir": "/opt/rocketride-bench/engine",
+    "engine_version": "Version: 3.2.1.30 hash: 114509c6 stamp: 2026-05-29T19:19:06Z",
+    "uri": "ws://localhost:5565",
+    "cpu_brand": "Apple M5 Pro",
+    "machine": "macOS-26.5.1-arm64-arm-64bit",
+    "arch": "arm64",
+    "physical_cores": 18,
+    "logical_cores": 18,
+    "total_ram_gib": 24.0,
+    "python": "3.12.13",
+    "engine_sha256": "4ad67d110cac51a0c683e8724b47a8d22e3b7543d9684a78b750f521c566ebf7",
+    "engine_size_bytes": 79021832
+  },
+  "rocketride": {
+    "file": "rr/workflow.pipe",
+    "imperative_lines": 0,
+    "components": 2,
+    "decision_points": 0,
+    "note": "concurrency/isolation owned by the runtime (M pipes, ttl= are RUN-time args, not authored code); each pipeline runs as its own process, so isolation is per-pipe by construction; artifact is schema-validated",
+    "validate": {
+      "ran": true,
+      "ok": true,
+      "errors": null
+    }
+  },
+  "langchain": [
+    {
+      "file": "lc/concurrent_batch.py",
+      "imperative_lines": 14,
+      "decision_points": 3,
+      "decisions": [
+        "batch vs abatch vs loop",
+        "max_concurrency value",
+        ".batch uses threads (implicit)"
+      ]
+    },
+    {
+      "file": "lc/concurrent_abatch.py",
+      "imperative_lines": 17,
+      "decision_points": 4,
+      "decisions": [
+        "batch vs abatch vs loop",
+        "max_concurrency value",
+        "sync vs async chain legs",
+        "blocking-sync-in-async serializes (implicit, silent)"
+      ]
+    },
+    {
+      "file": "lc/concurrent_seq.py",
+      "imperative_lines": 14,
+      "decision_points": 1,
+      "decisions": [
+        "batch vs abatch vs loop (gave up concurrency)"
+      ]
+    },
+    {
+      "file": "lc/concurrent_percall.py",
+      "imperative_lines": 17,
+      "decision_points": 5,
+      "decisions": [
+        "batch vs abatch vs loop",
+        "max_concurrency value",
+        ".batch uses threads (implicit)",
+        "sqlite conns are thread-affine (library doc)",
+        "therefore: state per call, never captured (discipline)"
+      ]
+    }
+  ],
+  "scope": {
+    "note": "this claim is about imperative concurrency lines, not token count"
+  },
+  "verdict_metrics": {
+    "rr_imperative_lines": 0,
+    "lc_imperative_lines_min": 14,
+    "lc_imperative_lines_max": 17,
+    "lc_decision_points_correct_version": 5,
+    "lc_natural_idioms_delivering_concurrency": 0,
+    "lc_idiom_outcomes": {"batch": "crashes", "abatch": "silently_serializes", "seq": "slow_correct"}
+  }
+}

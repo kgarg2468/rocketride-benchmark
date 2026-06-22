@@ -1,0 +1,57 @@
+{
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "type": "webhook",
+        "parameters": {}
+      },
+      "ui": {
+        "position": {
+          "x": 40,
+          "y": 120
+        },
+        "measured": {
+          "width": 150,
+          "height": 66
+        },
+        "nodeType": "default",
+        "formDataValid": true
+      }
+    },
+    {
+      "id": "work_1",
+      "provider": "workload",
+      "config": {},
+      "input": [
+        {
+          "from": "webhook_1",
+          "lane": "tags"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 260,
+          "y": 120
+        },
+        "measured": {
+          "width": 150,
+          "height": 66
+        },
+        "nodeType": "default",
+        "formDataValid": true
+      }
+    }
+  ],
+  "project_id": "00000000-0000-0000-0000-000000000000",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1,
+  "source": "webhook_1"
+}

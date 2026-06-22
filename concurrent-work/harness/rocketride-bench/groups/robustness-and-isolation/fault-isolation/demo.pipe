@@ -1,0 +1,55 @@
+{
+  "components": [
+    {
+      "id": "filesys_1",
+      "provider": "filesys",
+      "config": {
+        "type": "filesys",
+        "mode": "Source",
+        "actions": {},
+        "include": [{ "path": "${ROCKETRIDE_DEMO_DOCS}" }],
+        "parameters": { "excludeExternalDrives": true, "excludeEnableGlobal": true, "excludeSymlinks": true }
+      }
+    },
+    {
+      "id": "parse_1",
+      "provider": "parse",
+      "config": { "parameters": {} },
+      "input": [{ "lane": "tags", "from": "filesys_1" }]
+    },
+    {
+      "id": "question_1",
+      "provider": "question",
+      "config": { "instructions": [], "parameters": {} },
+      "input": [{ "lane": "text", "from": "parse_1" }]
+    },
+    {
+      "id": "prompt_1",
+      "provider": "prompt",
+      "config": {
+        "instructions": ["Summarize this document in 2 sentences. Be faithful to the source; do not invent facts."],
+        "parameters": {}
+      },
+      "input": [{ "lane": "questions", "from": "question_1" }]
+    },
+    {
+      "id": "llm_openai_1",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "input": [{ "lane": "questions", "from": "prompt_1" }]
+    },
+    {
+      "id": "response_answers_1",
+      "provider": "response_answers",
+      "config": { "laneName": "answers" },
+      "input": [{ "lane": "answers", "from": "llm_openai_1" }]
+    }
+  ],
+  "project_id": "2d8e4f1a-6b35-4c79-9e02-7a1b2c3d4e03",
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "version": 1
+}

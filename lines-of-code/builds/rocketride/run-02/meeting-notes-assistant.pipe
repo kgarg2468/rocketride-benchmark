@@ -1,0 +1,103 @@
+{
+  "components": [
+    {
+      "id": "transcript_source",
+      "provider": "chat",
+      "config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "chat" },
+      "ui": { "position": { "x": 20, "y": 320 }, "measured": { "width": 150, "height": 66 }, "nodeType": "default", "formDataValid": true }
+    },
+
+    {
+      "id": "orchestrator",
+      "provider": "agent_deepagent",
+      "config": {
+        "instructions": [
+          "You are the Meeting-Notes Orchestrator. Your job is to turn ONE pasted meeting transcript into ONE final response with exactly two sections, by delegating the writing to your two specialist sub-agents and then assembling their work. You never write the summary or the email yourself.",
+          "INPUT: The user message on your questions lane is the full raw meeting transcript (attendee names, discussion, decisions, action items). Treat the entire message as the transcript.",
+          "DELEGATION (do this in a SINGLE reasoning step so both run in parallel): call the `executive_summary_writer` sub-agent AND the `followup_email_writer` sub-agent in the same step. Pass each of them the COMPLETE, UNMODIFIED transcript as its task input. The two tasks are independent — issue both tool calls together, do not wait for one before starting the other.",
+          "Do NOT paraphrase, pre-summarize, or trim the transcript before delegating. Each specialist needs the full text.",
+          "ASSEMBLY: After both sub-agents return, assemble their outputs into the final response using EXACTLY this template, with a single blank line where shown and nothing before or after it:",
+          "## Executive Summary\n\n{executive_summary_writer output, verbatim}\n\n## Draft Follow-up Email\n\n{followup_email_writer output, verbatim}",
+          "Insert each sub-agent's returned text verbatim under its heading. Do not add the headings to the sub-agent inputs and do not duplicate a heading a sub-agent may have emitted — if a sub-agent's text begins with its own '## ...' heading, strip that leading heading line before inserting so each section heading appears exactly once.",
+          "OUTPUT CONTRACT: Return ONLY the assembled two-section document. No preamble (\"Here is...\"), no closing remarks, no extra Markdown, no notes about your process. The '## Executive Summary' line must be the very first line of your response.",
+          "If a sub-agent returns an error or empty text, retry that delegation once; if it still fails, fill that section with a single line: '_(section unavailable — sub-agent failed)_' and still return the other completed section so the contract structure is preserved."
+        ],
+        "parameters": {}
+      },
+      "input": [{ "lane": "questions", "from": "transcript_source" }],
+      "ui": { "position": { "x": 260, "y": 320 }, "measured": { "width": 150, "height": 86 }, "nodeType": "default", "formDataValid": true }
+    },
+
+    {
+      "id": "summary_subagent",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "executive_summary_writer",
+        "description": "Delegate here to write the Executive Summary section. Use this sub-agent whenever you need a tight, decision-focused recap of a meeting transcript. Input: the full transcript. Output: the summary prose only (no heading).",
+        "instructions": [
+          "You are an executive-summary specialist for meeting notes. You receive the full text of one meeting transcript and produce a crisp executive summary for a busy leader who did not attend.",
+          "CONTENT: Focus on (1) what was DECIDED and (2) what happens NEXT (owners, commitments, deadlines). Omit small talk, tangents, and play-by-play dialogue. Capture only outcomes and forward motion.",
+          "LENGTH & FORM: 3-4 complete sentences, STRICTLY under 100 words total. Plain, factual, neutral business prose. No bullet points, no headings, no markdown, no preamble.",
+          "Write in the third person and the past tense for decisions (\"The team decided...\"), present/future for next steps (\"Engineering will...\").",
+          "Do not invent facts, names, numbers, or dates that are not supported by the transcript. If the transcript is thin, summarize only what is actually present.",
+          "OUTPUT: Return ONLY the summary paragraph text. Do NOT include the '## Executive Summary' heading — the orchestrator adds it."
+        ],
+        "parameters": {}
+      },
+      "control": [{ "classType": "deepagent", "from": "orchestrator" }],
+      "ui": { "position": { "x": 260, "y": 540 }, "measured": { "width": 150, "height": 86 }, "nodeType": "default", "formDataValid": true }
+    },
+
+    {
+      "id": "email_subagent",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "followup_email_writer",
+        "description": "Delegate here to draft the follow-up email. Use this sub-agent whenever you need a professional post-meeting recap email addressed to the attendees. Input: the full transcript. Output: the email body only (no heading).",
+        "instructions": [
+          "You are a professional follow-up-email specialist. You receive the full text of one meeting transcript and draft the BODY of a recap email to send to the attendees.",
+          "STRUCTURE the email body in this order: (1) a greeting that names the attendees (e.g. 'Hi Alex, Priya, and Sam,'); (2) one or two sentences recapping the key decisions; (3) an 'Action items:' list, one per line, each as 'Owner — task — deadline' using the owners and dates stated in the transcript; (4) a closing sentence proposing concrete next steps (e.g. the next meeting or check-in); (5) a brief professional sign-off.",
+          "LENGTH & TONE: Keep the whole body STRICTLY under 200 words. Plain, professional, warm-but-concise tone. No marketing language, no emoji, no markdown headings.",
+          "Derive attendee names, owners, tasks, and deadlines ONLY from the transcript. If an owner or deadline is not stated, write 'owner TBD' or 'deadline TBD' rather than inventing one. Never fabricate names.",
+          "OUTPUT: Return ONLY the email body text (greeting through sign-off). Do NOT include a subject line, do NOT include the '## Draft Follow-up Email' heading — the orchestrator adds it."
+        ],
+        "parameters": {}
+      },
+      "control": [{ "classType": "deepagent", "from": "orchestrator" }],
+      "ui": { "position": { "x": 260, "y": 760 }, "measured": { "width": 150, "height": 86 }, "nodeType": "default", "formDataValid": true }
+    },
+
+    {
+      "id": "llm_orchestrator",
+      "provider": "llm_openai",
+      "config": { "profile": "gpt-4-1", "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" }, "parameters": {} },
+      "control": [{ "classType": "llm", "from": "orchestrator" }],
+      "ui": { "position": { "x": 480, "y": 320 }, "measured": { "width": 150, "height": 66 }, "nodeType": "default", "formDataValid": true }
+    },
+    {
+      "id": "llm_summary",
+      "provider": "llm_openai",
+      "config": { "profile": "gpt-4-1", "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" }, "parameters": {} },
+      "control": [{ "classType": "llm", "from": "summary_subagent" }],
+      "ui": { "position": { "x": 480, "y": 540 }, "measured": { "width": 150, "height": 66 }, "nodeType": "default", "formDataValid": true }
+    },
+    {
+      "id": "llm_email",
+      "provider": "llm_openai",
+      "config": { "profile": "gpt-4-1-mini", "gpt-4-1-mini": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" }, "parameters": {} },
+      "control": [{ "classType": "llm", "from": "email_subagent" }],
+      "ui": { "position": { "x": 480, "y": 760 }, "measured": { "width": 150, "height": 66 }, "nodeType": "default", "formDataValid": true }
+    },
+
+    {
+      "id": "final_answer",
+      "provider": "response_answers",
+      "config": { "laneName": "answers" },
+      "input": [{ "lane": "answers", "from": "orchestrator" }],
+      "ui": { "position": { "x": 700, "y": 320 }, "measured": { "width": 150, "height": 66 }, "nodeType": "default", "formDataValid": true }
+    }
+  ],
+  "project_id": "419f620c-b059-40f3-b3ef-180af8380289",
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "version": 1
+}

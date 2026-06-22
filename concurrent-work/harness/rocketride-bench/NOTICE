@@ -1,0 +1,27 @@
+rocketride-bench — what is RocketRide vs. what is this repo
+===========================================================
+
+The SYSTEM UNDER TEST is the genuine, unmodified RocketRide product:
+
+  * Engine (C++ runtime) ..... official release `rocketride-server-v3.2.1-<platform>`
+                               from github.com/rocketride-org/rocketride-server
+                               (or the public ghcr.io/rocketride-org/rocketride-engine image)
+  * EAAS server ............. the bundle's `ai/eaas.py` on ws://localhost:5565
+  * SDK / client ............ the published `rocketride` PyPI package (v1.2.0)
+  * Tracer .................. the engine's native tracer (apaevt_flow / apaevt_status_update)
+  * Provider nodes + catalog  the engine's shipped nodes + the generated .rocketride catalog
+
+This repo NEVER reimplements engine behavior — it only DRIVES and MEASURES the real product.
+
+The ONLY code we add is measurement scaffolding:
+
+  * harness/ .............. drives the SDK, captures the tracer to JSONL, measures CPU/RSS
+  * nodes/workload/ ..... a synthetic benchmark-only node (CPU/sleep/HTTP/crash modes). It is
+                            NOT part of RocketRide and is safe to delete; it runs INSIDE the real
+                            engine exactly as any user-authored node would.
+  * harness/lc_baselines.py + nodes/workload/IInstance.py — the deterministic fixed-latency model
+                            (`time.sleep`) and `busy()` CPU loop, AST-identical on BOTH the RocketRide node
+                            and the LangChain function side, so numbers reflect the framework, not API variance.
+
+RocketRide runtime + SDK are MIT-licensed (Copyright Aparavi Software AG). This benchmark repo is
+MIT-licensed (see LICENSE).

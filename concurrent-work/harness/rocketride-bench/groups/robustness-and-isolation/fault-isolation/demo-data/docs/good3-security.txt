@@ -1,0 +1,1 @@
+Security audit follow-up, July 1. Two findings remain open. Aisha will patch the auth service this week; Diego will re-run the scan next Monday.

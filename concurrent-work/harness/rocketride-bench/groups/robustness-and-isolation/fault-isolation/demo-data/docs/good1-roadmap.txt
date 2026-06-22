@@ -1,0 +1,1 @@
+Roadmap sync, May 6. The group approved the Q3 roadmap and agreed to ship the billing API first. Priya owns delivery by June 18; staffing is TBD.

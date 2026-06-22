@@ -1,0 +1,108 @@
+{
+  "benchmark": "lines-of-code",
+  "method": "Claude Code built the SAME meeting-notes workflow 5x in RocketRide (with the pipeline skills) and 5x in LangChain (idiomatic Python package). RocketRide artifact = one .pipe (declarative JSON); LangChain artifact = a Python package. Lines = artifact_size.py (pipe_lines for the .pipe, loc_total summed over the package's .py files); chars = raw character count. Reproduce: python measure.py.",
+  "aggregate": {
+    "n_builds": 5,
+    "workflow": "meeting-notes assistant (transcript -> executive summary + follow-up email)",
+    "rocketride_lines": {
+      "min": 104,
+      "median": 123,
+      "max": 136
+    },
+    "langchain_lines": {
+      "min": 682,
+      "median": 689,
+      "max": 930
+    },
+    "line_ratio_lc_over_rr": {
+      "min": 5.0,
+      "median": 6.0,
+      "max": 7.6
+    },
+    "rocketride_chars_median": 7010,
+    "langchain_chars_median": 25158,
+    "char_ratio_lc_over_rr_median": 3.6
+  },
+  "builds": [
+    {
+      "build": "run-01",
+      "rocketride": {
+        "pipe_lines": 115,
+        "chars": 6271,
+        "nodes": 8
+      },
+      "langchain": {
+        "loc_total": 689,
+        "sloc": 515,
+        "chars": 25158,
+        "files": 9
+      },
+      "ratio_lines": 6.0,
+      "ratio_chars": 4.0
+    },
+    {
+      "build": "run-02",
+      "rocketride": {
+        "pipe_lines": 104,
+        "chars": 8182,
+        "nodes": 8
+      },
+      "langchain": {
+        "loc_total": 685,
+        "sloc": 535,
+        "chars": 25153,
+        "files": 8
+      },
+      "ratio_lines": 6.6,
+      "ratio_chars": 3.1
+    },
+    {
+      "build": "run-03",
+      "rocketride": {
+        "pipe_lines": 123,
+        "chars": 7265,
+        "nodes": 9
+      },
+      "langchain": {
+        "loc_total": 930,
+        "sloc": 701,
+        "chars": 32041,
+        "files": 11
+      },
+      "ratio_lines": 7.6,
+      "ratio_chars": 4.4
+    },
+    {
+      "build": "run-04",
+      "rocketride": {
+        "pipe_lines": 128,
+        "chars": 7010,
+        "nodes": 8
+      },
+      "langchain": {
+        "loc_total": 771,
+        "sloc": 608,
+        "chars": 27452,
+        "files": 8
+      },
+      "ratio_lines": 6.0,
+      "ratio_chars": 3.9
+    },
+    {
+      "build": "run-05",
+      "rocketride": {
+        "pipe_lines": 136,
+        "chars": 6277,
+        "nodes": 8
+      },
+      "langchain": {
+        "loc_total": 682,
+        "sloc": 527,
+        "chars": 24358,
+        "files": 10
+      },
+      "ratio_lines": 5.0,
+      "ratio_chars": 3.9
+    }
+  ]
+}

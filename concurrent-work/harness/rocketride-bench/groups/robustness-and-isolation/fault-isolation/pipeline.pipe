@@ -1,0 +1,61 @@
+{
+  "components": [
+    {
+      "id": "src_1",
+      "provider": "filesys",
+      "config": {
+        "include": [
+          {
+            "path": "${ROCKETRIDE_BENCH_DATA}/input1"
+          }
+        ],
+        "key": "filesys://*",
+        "mode": "Source",
+        "type": "filesys"
+      },
+      "ui": {
+        "position": {
+          "x": 40,
+          "y": 120
+        },
+        "measured": {
+          "width": 150,
+          "height": 66
+        },
+        "nodeType": "default",
+        "formDataValid": true
+      }
+    },
+    {
+      "id": "work_1",
+      "provider": "workload",
+      "config": {},
+      "input": [
+        {
+          "from": "src_1",
+          "lane": "tags"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 260,
+          "y": 120
+        },
+        "measured": {
+          "width": 150,
+          "height": 66
+        },
+        "nodeType": "default",
+        "formDataValid": true
+      }
+    }
+  ],
+  "project_id": "00000000-0000-4000-8000-0000000000aa",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1,
+  "source": "src_1"
+}

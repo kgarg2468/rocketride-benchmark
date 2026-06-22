@@ -1,0 +1,16 @@
+parity gate: PASS (per-doc work AST-identical both sides)
+real langchain-core proven: 0.3.86 (/opt/rocketride-bench/.venv/bin/python)
+
+RR warm pools (N=64 docs, 100 ms work):
+  M= 8 wall= 0.914s p50= 110.7ms p99= 131.2ms markers=72/72 errs=0 rows=72/72 [ok]
+  M=16 wall= 0.550s p50= 133.9ms p99= 166.4ms markers=80/80 errs=0 rows=80/80 [ok]
+
+LangChain (same chain object, n=64, io=100 ms, mc=64):
+  LC batch_shared    status=crash wall=  0.01s ok= 0 err=64 sqlite3.ProgrammingError
+  LC abatch_blocking status=ok    wall=  6.67s ok=64 err= 0 
+  LC seq             status=ok    wall=  6.71s ok=64 err= 0 
+wrote: canvas.mmd canvas.dot
+
+appendix (1 pipe x threads=4, shared module conn): markers=32 tids=4 errors=31
+
+VERDICT @ top M: RR(top M) 0.55s ok | LC .batch(shared) crash (sqlite3.ProgrammingError) | LC .abatch(blocking) 6.7s | LC seq 6.7s

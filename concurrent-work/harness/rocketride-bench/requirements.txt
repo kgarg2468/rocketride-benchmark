@@ -1,0 +1,8 @@
+# Pinned harness deps. The RocketRide SDK + engine ARE the product under test.
+rocketride==1.2.0
+psutil>=5.9
+json5>=0.9
+
+# Real LangChain competitor baselines (the strict head-to-heads — no infra, no creds) live in
+# requirements-competitors.txt; install with `make provision-competitors`. Neither is needed for
+# the core suite — it stays dependency-free and reproducible by anyone.

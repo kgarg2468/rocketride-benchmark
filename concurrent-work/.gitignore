@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+# reproduction artifacts a re-runner generates locally — never commit these:
+harness/rocketride-bench/engine/
+harness/rocketride-bench/.venv/
+harness/rocketride-bench/results/
+harness/rocketride-bench/catalog/
+harness/rocketride-bench/**/canvas.mmd
+harness/rocketride-bench/**/canvas.dot

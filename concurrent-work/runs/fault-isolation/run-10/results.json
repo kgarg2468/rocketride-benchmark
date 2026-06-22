@@ -1,0 +1,43 @@
+{
+  "benchmark": "fault-isolation",
+  "old_id": "D5",
+  "hypothesis": "a hard node crash is isolated to its run; the server + siblings survive",
+  "provenance": {
+    "engine_dir": "/opt/rocketride-bench/engine",
+    "engine_version": "Version: 3.2.1.30 hash: 114509c6 stamp: 2026-05-29T19:19:06Z",
+    "uri": "ws://localhost:5565",
+    "cpu_brand": "Apple M5 Pro",
+    "machine": "macOS-26.5.1-arm64-arm-64bit",
+    "arch": "arm64",
+    "physical_cores": 18,
+    "logical_cores": 18,
+    "total_ram_gib": 24.0,
+    "python": "3.12.13",
+    "engine_sha256": "4ad67d110cac51a0c683e8724b47a8d22e3b7543d9684a78b750f521c566ebf7",
+    "engine_size_bytes": 79021832
+  },
+  "rocketride": {
+    "server_pid_before": 5113,
+    "healthy_before_ok": true,
+    "crash_run_completed": false,
+    "server_survived_crash": true,
+    "healthy_after_ok": true
+  },
+  "in_process_baseline": {
+    "framework": "langchain",
+    "tasks": 4,
+    "lc_version": "0.3.86",
+    "lc_python": "/opt/rocketride-bench/.venv/bin/python",
+    "langchain_core_file": "/opt/rocketride-bench/.venv/lib/python3.12/site-packages/langchain_core/__init__.py",
+    "healthy_completed": 4,
+    "completed": 0,
+    "process_exit_code": 134,
+    "died": true
+  },
+  "verdict_metrics": {
+    "rr_isolation_holds": true,
+    "inproc_framework": "langchain",
+    "inproc_healthy_ok": true,
+    "inproc_lost_all": true
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "components": [
+    {
+      "id": "chat_1",
+      "provider": "chat",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "type": "chat",
+        "parameters": {}
+      }
+    },
+
+    {
+      "id": "agent_orchestrator",
+      "provider": "agent_deepagent",
+      "config": {
+        "instructions": [
+          "You are the orchestrator of a meeting-notes assistant. Your input on the `questions` lane is a single raw meeting transcript pasted by a user. You never write the summary or the email yourself — you coordinate two specialist sub-agents and assemble their work into one final response.",
+          "For EVERY transcript you receive, delegate to BOTH sub-agents: pass the complete transcript verbatim as the task to `executive_summary_writer`, and pass the complete transcript verbatim as the task to `followup_email_drafter`. Issue both delegations together so the engine can run them concurrently; do not wait for one before starting the other, and do not skip either even if the transcript is short.",
+          "`executive_summary_writer` returns only the body of the executive summary. `followup_email_drafter` returns only the body of the follow-up email. Take their returned text as-is; do not rewrite, expand, summarize, or re-order their content beyond trivial whitespace cleanup.",
+          "Assemble the final answer in EXACTLY this format and nothing else — two Markdown H2 sections, in this order, with one blank line under each header:\n\n## Executive Summary\n\n<the text returned by executive_summary_writer>\n\n## Draft Follow-up Email\n\n<the text returned by followup_email_drafter>",
+          "Output ONLY those two sections. Do not add a preamble, a sign-off from yourself, notes about your process, JSON, or any third section. The two H2 headers must be spelled exactly '## Executive Summary' and '## Draft Follow-up Email'.",
+          "Resilience: if a sub-agent returns empty or clearly malformed output, delegate to it one more time. If it still fails, keep both headers and put a single italic line under the failing header explaining which section could not be generated (e.g. '*Summary unavailable — the summary sub-agent did not return output.*'). Never drop a header and never fabricate content to fill a gap."
+        ],
+        "max_waves": 10,
+        "parameters": {}
+      },
+      "input": [
+        { "lane": "questions", "from": "chat_1" }
+      ]
+    },
+
+    {
+      "id": "agent_summary",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "executive_summary_writer",
+        "description": "Writes the executive-summary section of a meeting from its transcript: 3-4 sentences, under 100 words, focused on what was decided and what happens next. Invoke this for the summary portion of every transcript.",
+        "instructions": [
+          "You write the executive summary of a meeting. Your input is the full meeting transcript. Produce a tight, executive-grade summary of what the meeting actually concluded.",
+          "Hard constraints: 3 to 4 sentences, strictly under 100 words total. Focus on decisions made and concrete next steps / owners — NOT a chronological play-by-play of the discussion and not background context.",
+          "Tone: neutral, factual, and concise, written for a busy executive who did not attend. No hype, no filler, no first-person.",
+          "Grounding: use ONLY facts, names, decisions, and dates that appear in the transcript. Do not invent decisions, owners, numbers, or deadlines. If the meeting reached no firm decision, say so plainly in one sentence.",
+          "Output format: return ONLY the summary prose. Do not include a heading, a 'Summary:' label, bullet points, or any Markdown — just the sentences. The orchestrator adds the section header."
+        ],
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "deepagent", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "agent_email",
+      "provider": "agent_deepagent_subagent",
+      "config": {
+        "name": "followup_email_drafter",
+        "description": "Drafts the follow-up email section from a meeting transcript: greets attendees by name, recaps decisions, lists action items with owners and deadlines, and proposes next steps. Invoke this for the email portion of every transcript.",
+        "instructions": [
+          "You draft the post-meeting follow-up email. Your input is the full meeting transcript. Produce a ready-to-send email BODY that recaps the meeting and drives the action items forward.",
+          "Hard constraints: the email body must be under 200 words. Open by greeting the attendees by name (use the names found in the transcript). Then, in this order: a one-line recap of the key decisions; an 'Action items:' list where each item names its owner and its deadline; and a short closing line proposing next steps or the next meeting.",
+          "Tone: plain, professional, and warm-but-efficient. No marketing language, no emoji, no exclamation marks.",
+          "Grounding: use ONLY attendee names, owners, decisions, and deadlines present in the transcript. If an action item has no stated owner, write 'Owner: TBD'; if it has no stated deadline, write 'Deadline: TBD'. Never invent a person or a date.",
+          "Output format: return ONLY the email body as plain text / light Markdown (a greeting line, the recap, an 'Action items:' bullet list, and a sign-off such as 'Best regards,\\n[Your name]'). Do not include a 'Subject:' line and do not add a section heading — the orchestrator adds the section header."
+        ],
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "deepagent", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "llm_orchestrator",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_orchestrator" }
+      ]
+    },
+
+    {
+      "id": "llm_summary",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1",
+        "gpt-4-1": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_summary" }
+      ]
+    },
+
+    {
+      "id": "llm_email",
+      "provider": "llm_openai",
+      "config": {
+        "profile": "gpt-4-1-mini",
+        "gpt-4-1-mini": { "apikey": "${ROCKETRIDE_OPENAI_KEY}" },
+        "parameters": {}
+      },
+      "control": [
+        { "classType": "llm", "from": "agent_email" }
+      ]
+    },
+
+    {
+      "id": "response_1",
+      "provider": "response_answers",
+      "config": {
+        "laneName": "answers"
+      },
+      "input": [
+        { "lane": "answers", "from": "agent_orchestrator" }
+      ]
+    }
+  ],
+  "project_id": "7f3e9a2c-1b4d-4e6a-9c8f-2a5b7d1e3c40",
+  "viewport": { "x": 0, "y": 0, "zoom": 1 },
+  "version": 1
+}

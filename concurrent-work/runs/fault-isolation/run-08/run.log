@@ -1,0 +1,4 @@
+wrote: canvas.mmd canvas.dot
+RocketRide: healthy-before=True  crash-run-completed=False  server-survived=True  healthy-after=True
+In-process baseline (langchain): healthy 4/4, crash-run 0/4, exit 134 (process DIED)
+VERDICT: RR isolation holds = True ; in-process lost all = True

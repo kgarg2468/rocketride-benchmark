@@ -1,0 +1,15 @@
+Weekly Product Sync — May 6, 2026
+Attendees: Priya (PM), Marcus (Eng Lead), Dana (Design), Wei (Data)
+
+Priya: Thanks all. Top item is the billing API migration. Are we still on for the November launch?
+Marcus: Backend is on track. We agreed last week to cut over the old billing tables by November 15.
+Wei: I can have the data-warehouse mapping done by October 27 so QA has a week.
+Dana: The new invoice screen needs one more round. I'll share final mocks by May 13.
+Priya: Good. Decision: we ship the billing API on November 15, behind a feature flag.
+Marcus: I'll own the cutover. Wei, please prepare the migration script.
+Wei: Will do — script ready by October 27.
+Priya: Marketing asked for launch materials. Dana, can you brief them?
+Dana: Yes, I'll send the brief to Marketing by May 20.
+Priya: Last thing — budget for extra QA contractors is still open; we'll revisit next week.
+Marcus: One risk: if the warehouse cutover slips, the launch date is at risk.
+Priya: Noted. Let's keep November 15 as the target. Thanks everyone.

@@ -1,0 +1,17 @@
+# Pinned to a known-compatible set in the LangChain 0.3 line.
+# Install with:  pip install -r requirements.txt
+#
+# If your resolver objects to an exact patch version, the minor versions are
+# what matter for API compatibility (langchain 0.3.x / langchain-openai 0.3.x /
+# openai 1.x / pydantic 2.x).
+
+langchain==0.3.27
+langchain-core==0.3.75
+langchain-openai==0.3.33
+openai==1.109.1
+pydantic==2.11.9
+python-dotenv==1.0.1
+
+# Transitive but pinned for reproducibility:
+tenacity==9.1.2
+tiktoken==0.11.0

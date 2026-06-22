@@ -1,0 +1,43 @@
+{
+  "benchmark": "summary",
+  "kind": "synthesis",
+  "hypothesis": "On concurrent stateful work, RocketRide builds the correct version with 0 imperative concurrency lines and is safe by default, where LangChain needs 14-17 lines + 5 hidden facts and its natural default still fails outright (data loss, crash, or losing every task). Synthesis; numbers re-derived from this repo's committed N=10 runs.",
+  "note": "Headline metrics only; the per-benchmark results.json (10 reps each) under ../concurrent-work/runs/ are authoritative. See REPORT.md / PRE-REGISTRATION.md / capability-ledger.md.",
+  "provenance": {
+    "engine_version": "Version: 3.2.1.30 hash: 114509c6 stamp: 2026-05-29T19:19:06Z",
+    "engine_sha256": "4ad67d110cac51a0c683e8724b47a8d22e3b7543d9684a78b750f521c566ebf7",
+    "langchain_core_version": "0.3.86",
+    "langchain_proof": "lc_version + lc_python + langchain_core_file recorded per LangChain row; AST parity gate PASS",
+    "machine": "macOS-26.5.1-arm64-arm-64bit",
+    "cpu_brand": "Apple M5 Pro",
+    "python": "3.12.13",
+    "pool_sizes_disclosed": {"concurrent-processing": "M=8,16", "data-isolation": "M=32"}
+  },
+  "concurrency_authoring_correctness_N10": {
+    "rr_imperative_concurrency_lines": 0,
+    "rr_hidden_decisions": 0,
+    "lc_imperative_lines_range": "14-17",
+    "lc_hidden_decisions_correct_version": 5,
+    "lc_natural_idioms_delivering_concurrency": 0,
+    "lc_idiom_outcomes": {"batch": "crashes", "abatch": "silently_serializes", "seq": "slow_correct"},
+    "instance_lc_lost_of_256_range": "96-215",
+    "instance_lc_lost_pct_range": "38-84",
+    "instance_rr_lost": 0,
+    "pick_rr_node_errors": 0,
+    "pick_lc_batch_shared": "crash 0/64 (sqlite3.ProgrammingError)",
+    "pick_lc_abatch_serializes": true,
+    "crash_rr_isolation_holds_all10": true,
+    "crash_lc_inproc_lost_all_all10": true,
+    "reps": 10
+  },
+  "capability_ledger_summary": {
+    "rocketride_wins_by_default_measured": ["isolation/state-safety", "authoring/concurrency-code"]
+  },
+  "claim": "RocketRide builds the correct concurrent-stateful version with 0 imperative concurrency lines and is safe by default (0 lost / 0 errors / survives, N=10); LangChain's default needs 14-17 lines + 5 facts and still loses 38-84% / crashes / loses-all.",
+  "sources": {
+    "authoring": "../concurrent-work/runs/authoring-effort/results.json",
+    "lost_updates": "../concurrent-work/runs/data-isolation/run-01..run-10/results.json",
+    "concurrent_processing": "../concurrent-work/runs/concurrent-processing/run-01..run-10/results.json",
+    "fault_isolation": "../concurrent-work/runs/fault-isolation/run-01..run-10/results.json"
+  }
+}

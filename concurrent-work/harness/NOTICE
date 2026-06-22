@@ -1,0 +1,28 @@
+# NOTICE
+
+This `rocketride-bench/` tree is the measurement harness for the concurrency benchmarks: the runners,
+the synthetic workload node, and the real-LangChain baseline, plus the data and scripts to run them.
+
+The RocketRide **runtime** is not included here (it's a platform-specific binary). `scripts/provision.sh`
+downloads the pinned public release **rocketride-server v3.2.1**; the results in `../runs/` were produced
+on runtime build **3.2.1.30** (hash 114509c6).
+
+Pool size is exposed as an env var (`BENCH_MS` / `BENCH_M`) so the 10× reps run at a chosen size; the
+isolation results are size-independent. The 10× reps in `../runs/` used `BENCH_MS=8,16` and `BENCH_M=32`
+(disclosed in each REPORT).
+
+**Test data.** The repo commits 32 synthetic text records (`data/input32/`); the 64- and 256-document
+working sets are generated programmatically from those committed records at run time (the timed cells
+expand them into per-document payloads), and the code-volume benchmark uses one fixed synthetic meeting
+transcript. The failure modes under test are structural properties of each framework's concurrency model
+and appear identically regardless of input content; the seed data is committed so any reproduction starts
+from the exact same inputs.
+
+**Warm pool.** The concurrent-processing benchmark runs against warm resident pipes at M=8 and M=16 (a
+production serving topology; the headline 0.59 s is the M=16 median). The one-time warm-up is recorded
+separately (`warm_s` in `results.json`) and excluded from the measured work.
+
+Each `groups/<group>/<benchmark>/` folder also ships a runnable **`demo.pipe`** (+ `demo-data/` + a
+`README.md`) — a real-node pipeline that lets you run the claim yourself, driven by `harness/run_demo.py`.
+
+Licensing: this harness is MIT (see `LICENSE`); the RocketRide runtime + SDK are MIT (Aparavi Software AG).

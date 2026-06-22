@@ -1,0 +1,21 @@
+{
+	"title": "Bench Work",
+	"protocol": "workload://",
+	"classType": ["preprocessor"],
+	"capabilities": [],
+	"register": "filter",
+	"node": "python",
+	"path": "nodes.workload",
+	"prefix": "BenchWork",
+	"description": ["Benchmark-only node (NOT part of RocketRide; safe to delete). Per object, performs controllable synthetic work — CPU busy-loop, sleep, blocking HTTP GET, or none — selected by env (BENCH_MODE). Reads the filesys/dropper 'tags' lane directly (no parse/Tika). Emits one RRBENCH stderr line per call with perf+epoch start/end, OS thread id, and pid for span/overlap/parallelism analysis."],
+	"lanes": {
+		"tags": ["tags"]
+	},
+	"shape": [
+		{
+			"section": "Pipe",
+			"title": "Bench Work",
+			"properties": []
+		}
+	]
+}
